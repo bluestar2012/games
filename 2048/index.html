@@ -454,24 +454,42 @@
             return COLORS[value] || COLORS.super;
         }
 
+        function getTilePosition(row, col) {
+            const cell = document.querySelector('.cell');
+            const board = document.querySelector('.game-board');
+            if (!cell || !board) return { top: 0, left: 0, size: 80 };
+
+            const boardRect = board.getBoundingClientRect();
+            const isMobile = window.innerWidth <= 480;
+            const isVerySmall = window.innerWidth <= 360;
+
+            const gap = isVerySmall ? 6 : (isMobile ? 8 : 12);
+            const padding = isVerySmall ? 6 : (isMobile ? 8 : 12);
+            const availableSize = boardRect.width - padding * 2;
+            const cellSize = (availableSize - gap * 3) / 4;
+
+            return {
+                top: padding + row * (cellSize + gap),
+                left: padding + col * (cellSize + gap),
+                size: cellSize
+            };
+        }
+
         function getFontSize(value) {
+            if (window.innerWidth <= 360) {
+                if (value < 100) return 24;
+                if (value < 1000) return 20;
+                return 16;
+            }
+            if (window.innerWidth <= 480) {
+                if (value < 100) return 32;
+                if (value < 1000) return 26;
+                return 20;
+            }
             if (value < 100) return 48;
             if (value < 1000) return 40;
             if (value < 10000) return 32;
             return 24;
-        }
-
-        function getTilePosition(row, col) {
-            const cell = document.querySelector('.cell');
-            if (!cell) return { top: 0, left: 0, size: 80 };
-            const cellRect = cell.getBoundingClientRect();
-            const cellSize = cellRect.width;
-            const gap = 12;
-            return {
-                top: row * (cellSize + gap),
-                left: col * (cellSize + gap),
-                size: cellSize
-            };
         }
 
         function render(newTile = null, mergedTiles = []) {

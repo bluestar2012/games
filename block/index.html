@@ -244,33 +244,40 @@
       .game-container {
         flex-direction: column;
         align-items: center;
-        gap: 15px;
+        gap: 10px;
         padding: 5px;
       }
 
+      .main-panel {
+        order: 1;
+      }
+
       .side-panel {
+        order: 2;
         flex-direction: row;
         flex-wrap: wrap;
         justify-content: center;
         min-width: auto;
         width: 100%;
-        gap: 8px;
+        gap: 6px;
+        max-width: 320px;
       }
 
       .panel-box {
-        padding: 8px 12px;
+        padding: 6px 10px;
         flex: 1;
-        min-width: 70px;
-        max-width: 100px;
+        min-width: 60px;
+        max-width: 80px;
       }
 
-      .panel-box:last-child,
-      .panel-box:nth-last-child(2) {
+      .panel-box:nth-child(1),
+      .panel-box:nth-child(2) {
         max-width: none;
+        flex: 1 1 45%;
       }
 
       .panel-value {
-        font-size: 16px;
+        font-size: 14px;
       }
 
       .panel-title {
@@ -288,8 +295,143 @@
       }
 
       #nextCanvas {
-        width: 60px;
-        height: 60px;
+        width: 50px;
+        height: 50px;
+      }
+
+      /* 手机端控制按钮 */
+      .mobile-controls {
+        display: flex;
+        order: 3;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        margin-top: 10px;
+        padding: 10px;
+        background: linear-gradient(145deg, #0d0d14, #12121a);
+        border: 1px solid #1a1a2e;
+        border-radius: 12px;
+        width: 100%;
+        max-width: 320px;
+      }
+
+      .mobile-btn {
+        background: linear-gradient(145deg, #1a1a2e, #0d0d14);
+        border: 1px solid #2a2a4e;
+        color: #e0e0e0;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        cursor: pointer;
+        transition: all 0.15s;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .mobile-btn:active {
+        background: #00ff88;
+        color: #0a0a0f;
+        transform: scale(0.95);
+      }
+
+      .mobile-btn.rotate {
+        font-size: 16px;
+      }
+
+      .mobile-btn.drop {
+        font-size: 14px;
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(145deg, #1a2a1a, #0d1a0d);
+        border-color: #00ff88;
+        color: #00ff88;
+      }
+
+      .mobile-btn.drop:active {
+        background: #00ff88;
+        color: #0a0a0f;
+      }
+
+      .dpad {
+        display: grid;
+        grid-template-columns: repeat(3, 50px);
+        grid-template-rows: repeat(3, 50px);
+        gap: 4px;
+      }
+
+      .dpad .mobile-btn:nth-child(1) { grid-area: 1 / 2; }
+      .dpad .mobile-btn:nth-child(2) { grid-area: 2 / 1; }
+      .dpad .mobile-btn:nth-child(3) { grid-area: 2 / 3; }
+      .dpad .mobile-btn:nth-child(4) { grid-area: 3 / 2; }
+
+      .action-btns {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .action-row {
+        display: flex;
+        gap: 8px;
+      }
+    }
+
+    /* 超小屏幕 (<=360px) */
+    @media (max-width: 360px) {
+      .game-container {
+        gap: 8px;
+        padding: 5px;
+      }
+
+      .side-panel {
+        gap: 4px;
+        max-width: 280px;
+      }
+
+      .panel-box {
+        padding: 5px 6px;
+        min-width: 50px;
+        max-width: 65px;
+      }
+
+      .panel-value {
+        font-size: 12px;
+      }
+
+      .panel-title {
+        font-size: 8px;
+      }
+
+      .mobile-controls {
+        max-width: 280px;
+        gap: 6px;
+        padding: 8px;
+      }
+
+      .mobile-btn {
+        width: 42px;
+        height: 42px;
+        font-size: 16px;
+      }
+
+      .dpad {
+        grid-template-columns: repeat(3, 42px);
+        grid-template-rows: repeat(3, 42px);
+        gap: 3px;
+      }
+
+      .mobile-btn.rotate {
+        font-size: 14px;
+      }
+
+      .mobile-btn.drop {
+        width: 48px;
+        height: 48px;
+        font-size: 12px;
       }
     }
 
@@ -354,6 +496,10 @@
       .controls {
         gap: 10px;
       }
+
+      .mobile-controls {
+        display: none;
+      }
     }
   </style>
 </head>
@@ -371,7 +517,7 @@
       </div>
       <div id="startOverlay" class="overlay">
         <div class="overlay-title" style="color: #00ff88;">俄罗斯方块</div>
-        <div class="overlay-sub">按 空格键 开始</div>
+        <div class="overlay-sub">按 空格键 或点击下方按钮 开始</div>
         <div class="key-hints">
           ← → 移动 &nbsp; ↑ 旋转<br>
           ↓ 加速下落 &nbsp; 空格 硬降<br>
@@ -416,6 +562,26 @@
           <span class="sound-icon">♪</span>
           背景音乐
         </label>
+      </div>
+    </div>
+
+    <!-- 手机端控制按钮 -->
+    <div class="mobile-controls">
+      <div class="dpad">
+        <button class="mobile-btn" id="btnUp" title="旋转">↑</button>
+        <button class="mobile-btn" id="btnLeft" title="左移">←</button>
+        <button class="mobile-btn" id="btnRight" title="右移">→</button>
+        <button class="mobile-btn" id="btnDown" title="下落">↓</button>
+      </div>
+      <div class="action-btns">
+        <div class="action-row">
+          <button class="mobile-btn rotate" id="btnRotate" title="旋转">转</button>
+          <button class="mobile-btn drop" id="btnHardDrop" title="硬降">落</button>
+        </div>
+        <div class="action-row">
+          <button class="mobile-btn" id="btnPause" title="暂停">P</button>
+          <button class="mobile-btn" id="btnRestart" title="重开">R</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1016,6 +1182,74 @@
       resizeCanvas();
       render();
       renderNext();
+    });
+
+    // 手机端控制按钮事件
+    document.getElementById('btnLeft').addEventListener('click', function() {
+      if (gameState !== 'playing') return;
+      if (valid(currentPiece, -1)) {
+        currentPiece.x--;
+        playMoveSound();
+        render();
+      }
+    });
+
+    document.getElementById('btnRight').addEventListener('click', function() {
+      if (gameState !== 'playing') return;
+      if (valid(currentPiece, 1)) {
+        currentPiece.x++;
+        playMoveSound();
+        render();
+      }
+    });
+
+    document.getElementById('btnDown').addEventListener('click', function() {
+      if (gameState !== 'playing') return;
+      drop();
+      render();
+    });
+
+    document.getElementById('btnUp').addEventListener('click', function() {
+      if (gameState !== 'playing') return;
+      var rotated = rotate(currentPiece);
+      if (valid(currentPiece, 0, 0, rotated)) {
+        currentPiece.shape = rotated;
+        playRotateSound();
+        render();
+      }
+    });
+
+    document.getElementById('btnRotate').addEventListener('click', function() {
+      if (gameState !== 'playing') return;
+      var rotated = rotate(currentPiece);
+      if (valid(currentPiece, 0, 0, rotated)) {
+        currentPiece.shape = rotated;
+        playRotateSound();
+        render();
+      }
+    });
+
+    document.getElementById('btnHardDrop').addEventListener('click', function() {
+      if (gameState !== 'playing') return;
+      hardDrop();
+      render();
+    });
+
+    document.getElementById('btnPause').addEventListener('click', function() {
+      togglePause();
+    });
+
+    document.getElementById('btnRestart').addEventListener('click', function() {
+      if (gameState === 'gameover' || gameState === 'paused') {
+        startGame();
+      }
+    });
+
+    // 点击开始覆盖层也可以开始游戏（手机端支持）
+    document.getElementById('startOverlay').addEventListener('click', function(e) {
+      if (gameState === 'waiting') {
+        startGame();
+      }
     });
   </script>
 </body>
