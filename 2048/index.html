@@ -456,10 +456,8 @@
 
         function getTilePosition(row, col) {
             const cells = document.querySelectorAll('.cell');
-            if (cells.length === 0) return { top: 0, left: 0, size: 80 };
-
-            const board = document.querySelector('.game-board');
-            const boardRect = board.getBoundingClientRect();
+            const tilesEl = document.querySelector('.tiles');
+            if (cells.length === 0 || !tilesEl) return { top: 0, left: 0, size: 80 };
 
             // 找到 row, col 位置的 cell（利用 grid 布局特点：每行4个）
             const cellIndex = row * 4 + col;
@@ -467,10 +465,12 @@
             if (!cell) return { top: 0, left: 0, size: 80 };
 
             const cellRect = cell.getBoundingClientRect();
+            const tilesRect = tilesEl.getBoundingClientRect();
 
+            // 返回相对于 tiles 容器的位置
             return {
-                top: cellRect.top - boardRect.top,
-                left: cellRect.left - boardRect.left,
+                top: cellRect.top - tilesRect.top,
+                left: cellRect.left - tilesRect.left,
                 size: cellRect.width
             };
         }

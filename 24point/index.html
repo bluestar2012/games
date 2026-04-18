@@ -38,8 +38,50 @@
 
     .subtitle {
       color: #888;
-      margin-bottom: 40px;
+      margin-bottom: 20px;
       font-size: 0.95rem;
+    }
+
+    .score-bar {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 25px;
+    }
+
+    .score-item {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .score-item.best {
+      background: rgba(243, 156, 18, 0.1);
+      border-color: rgba(243, 156, 18, 0.3);
+    }
+
+    .score-label {
+      font-size: 0.85rem;
+      color: #888;
+    }
+
+    .score-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #f39c12;
+      font-family: 'Roboto Mono', monospace;
+    }
+
+    .score-item.best .score-value {
+      color: #ffcc00;
+    }
+
+    .score-unit {
+      font-size: 0.8rem;
+      color: #666;
     }
 
     .cards-container {
@@ -300,17 +342,34 @@
     /* 手机竖屏 (<480px) */
     @media (max-width: 480px) {
       body {
-        padding: 25px 15px;
+        padding: 20px 15px;
       }
 
       h1 {
-        font-size: 1.8rem;
-        margin-bottom: 8px;
+        font-size: 1.6rem;
+        margin-bottom: 6px;
       }
 
       .subtitle {
-        font-size: 0.85rem;
-        margin-bottom: 25px;
+        font-size: 0.8rem;
+        margin-bottom: 15px;
+      }
+
+      .score-bar {
+        gap: 12px;
+        margin-bottom: 15px;
+      }
+
+      .score-item {
+        padding: 8px 14px;
+      }
+
+      .score-value {
+        font-size: 1.4rem;
+      }
+
+      .score-label {
+        font-size: 0.75rem;
       }
 
       .cards-container {
@@ -399,6 +458,19 @@
   <h1>24点游戏</h1>
   <p class="subtitle">用四张牌的数字，通过加减乘除得到24</p>
 
+  <div class="score-bar">
+    <div class="score-item">
+      <span class="score-label">本轮</span>
+      <span class="score-value" id="currentScore">0</span>
+      <span class="score-unit">分</span>
+    </div>
+    <div class="score-item best">
+      <span class="score-label">最高</span>
+      <span class="score-value" id="bestScore">0</span>
+      <span class="score-unit">分</span>
+    </div>
+  </div>
+
   <div class="cards-container" id="cards">
     <div class="card">?</div>
     <div class="card">?</div>
@@ -437,12 +509,34 @@
   <script>
     let currentNumbers = [];
     let solution = null;
+    let currentScore = 0;
+    let bestScore = parseInt(localStorage.getItem('24point-best')) || 0;
+    let hasAnswered = false; // 本轮是否已答对
 
     const cardsEl = document.getElementById('cards');
     const expressionInput = document.getElementById('expression');
     const resultDisplay = document.getElementById('result');
     const hintBox = document.getElementById('hintBox');
     const hintExpression = document.getElementById('hintExpression');
+    const currentScoreEl = document.getElementById('currentScore');
+    const bestScoreEl = document.getElementById('bestScore');
+
+    // 初始化显示最高分
+    bestScoreEl.textContent = bestScore;
+
+    function updateScoreDisplay() {
+      currentScoreEl.textContent = currentScore;
+      if (currentScore > bestScore) {
+        bestScore = currentScore;
+        bestScoreEl.textContent = bestScore;
+        localStorage.setItem('24point-best', bestScore);
+      }
+    }
+
+    function addScore(points) {
+      currentScore += points;
+      updateScoreDisplay();
+    }
 
     // 生成随机数 1-10
     function generateNumbers() {
@@ -579,6 +673,7 @@
       resultDisplay.className = 'result-display';
       hintBox.classList.remove('visible');
       expressionInput.focus();
+      hasAnswered = false;
 
       // 推迟 solve24 计算，让动画先完成渲染
       solution = null;
@@ -598,6 +693,7 @@
       if (solution) {
         hintExpression.textContent = solution;
         hintBox.classList.add('visible');
+        hasAnswered = true; // 使用提示后不能再得分
       } else {
         hintExpression.textContent = '这组牌无解，请重新发牌';
         hintBox.classList.add('visible');
@@ -628,12 +724,16 @@
         cardsEl.classList.add('shake');
         setupContainerAnimationEndListener(cardsEl, 'shake');
       } else if (evalResult.result === 24) {
-        resultDisplay.textContent = '恭喜你答对了！🎉';
+        resultDisplay.textContent = '恭喜你答对了！+10分';
         resultDisplay.className = 'result-display success';
         cardsEl.classList.remove('celebrate');
         void cardsEl.offsetWidth;
         cardsEl.classList.add('celebrate');
         setupContainerAnimationEndListener(cardsEl, 'celebrate');
+        if (!hasAnswered) {
+          hasAnswered = true;
+          addScore(10);
+        }
       } else {
         resultDisplay.textContent = `结果: ${evalResult.result}，不等于24`;
         resultDisplay.className = 'result-display error';
